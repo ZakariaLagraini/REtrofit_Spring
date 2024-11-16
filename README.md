@@ -1,51 +1,52 @@
-# Java 9 Spring MVC Example
+# This repo is archived
 
-This Repository is an example of how to use Spring with Java 9 modules, leveraging maven multi-modules for per module
-dependency management.
+# springboot-sample-app
 
-## Intention for Writing
+[![Build Status](https://travis-ci.org/codecentric/springboot-sample-app.svg?branch=master)](https://travis-ci.org/codecentric/springboot-sample-app)
+[![Coverage Status](https://coveralls.io/repos/github/codecentric/springboot-sample-app/badge.svg?branch=master)](https://coveralls.io/github/codecentric/springboot-sample-app?branch=master)
+[![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-Interoperability between Spring and Java 9 is still very fiddly. This repository serves as a functioning example
-that can be used to help diagnose some common issues.
+Minimal [Spring Boot](http://projects.spring.io/spring-boot/) sample app.
 
-## Running this example
+## Requirements
 
-**NOTE**: At the moment, you can't just dive on in and run the application inside an IDE. The support simply isn't there
-yet.
+For building and running the application you need:
 
-From the root of the project:
+- [JDK 1.8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+- [Maven 3](https://maven.apache.org)
 
-```bash
-mvn clean install
-java -jar app/target/app-1.0-SNAPSHOT-exec.jar
+## Running the application locally
+
+There are several ways to run a Spring Boot application on your local machine. One way is to execute the `main` method in the `de.codecentric.springbootsample.Application` class from your IDE.
+
+Alternatively you can use the [Spring Boot Maven plugin](https://docs.spring.io/spring-boot/docs/current/reference/html/build-tool-plugins-maven-plugin.html) like so:
+
+```shell
+mvn spring-boot:run
 ```
 
-This will spin up a spring boot application with a two endpoints, `/users/{id}` that you can fire a GET request at
-to get some dummy output and `/admin/metrics` which will give you a dummy, basic metrics endpoint.
+## Deploying the application to OpenShift
 
-## How this works
+The easiest way to deploy the sample application to OpenShift is to use the [OpenShift CLI](https://docs.openshift.org/latest/cli_reference/index.html):
 
-### Dependency Management
+```shell
+oc new-app codecentric/springboot-maven3-centos~https://github.com/codecentric/springboot-sample-app
+```
 
-Each of the modules are themselves maven modules, which a parent pom in the root of the project. The parent pom
-orchestrates building each of the modules.
+This will create:
 
-### Working with Spring
+* An ImageStream called "springboot-maven3-centos"
+* An ImageStream called "springboot-sample-app"
+* A BuildConfig called "springboot-sample-app"
+* DeploymentConfig called "springboot-sample-app"
+* Service called "springboot-sample-app"
 
-The admin and users modules don't contain a main method in them. They act as collections of all the functionality related
-to admins and users.
+If you want to access the app from outside your OpenShift installation, you have to expose the springboot-sample-app service:
 
-The app module then brings these in as dependencies, which can be seen in `pom.xml` for the app module and in the `module-info.java`
-inside `/src/main` in the app module.
+```shell
+oc expose springboot-sample-app --hostname=www.example.com
+```
 
-This is configured to automatically detect beans on the classpath and in the current package or lower, so each of the modules
-*must* be of the form `java9.spring.mvc.**`, otherwise Spring will not detect the beans.
+## Copyright
 
-The advantage of this approach is that the users and admin modules don't need to know anything about how the app is running.
-They simply spin up the APIs they're interested in.
-
-### Weird bits
-
-Because they're maven multi modules, you need to define the dependencies in multiple different places. It would have been
-preferable to define them in one place and require them in the `module-info.java`. Perhaps this is possible; I'm not a 
-maven wizard so will investigate further.
+Released under the Apache License 2.0. See the [LICENSE](https://github.com/codecentric/springboot-sample-app/blob/master/LICENSE) file.
